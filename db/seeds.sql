@@ -1,0 +1,2 @@
+INSERT INTO burgers (burger_name, devoured, date)
+VALUES ('Cheeseburger', false, '2001-01-01 00:00:01'), ('Bacon Burger', false, '1970-01-01 00:00:01'), ('Goober Burger', false, '2010-01-01 00:00:01'), ('Bacon Double Cheeseburger', true, '2010-01-01 00:00:01');
