@@ -1,108 +1,32 @@
-var express = require("express");
-var bodyParser = require("body-parser");
+// Import dependencies.
+var express = require('express');
+var path = require('path');
+var exphbs = require('express-handlebars');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
 
+// Initialize app.
 var app = express();
-var port = 3000;
 
-// Sets up the Express app to handle data parsing
-app.use(bodyParser.urlencoded({ extended: false }));
+// Serve static content for the app from the "public" directory in the application directory.
+app.use(express.static(path.join(__dirname, 'public')));
+
+var PORT = process.env.PORT || 3000;
+
+// Set handlebars as view engine.
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+// Body Parser
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
-var exphbs = require("express-handlebars");
+// Method override.
+app.use(methodOverride('_method'));
 
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
-app.set("view engine", "handlebars");
+// Import routes and give the server access to them.
+var routes = require('./controllers/burgers_controller.js');
+app.use('/', routes);
 
-var mysql = require("mysql");
-
-var connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "movie_planner_db"
-});
-
-connection.connect(function(err) {
-  if (err) {
-    console.error("error connecting: " + err.stack);
-    return;
-  }
-
-  console.log("connected as id " + connection.threadId);
-});
-
-
-// Use Handlebars to render the main index.html page with the movies in it.
-app.get("/", function(req, res) {
-  connection.query("SELECT * FROM movies;", function(err, data) {
-    if (err) {
-      return res.status(500).end();
-    }
-
-    res.render("index", { movies: data });
-  });
-});
-
-
-// Create a new movie
-app.post("/movies", function(req, res) {
-  connection.query("INSERT INTO movies (movie) VALUES (?)", [req.body.movie], function(err, result) {
-    if (err) {
-      return res.status(500).end();
-    }
-
-    // Send back the ID of the new movie
-    res.json({ id: result.insertId });
-    console.log({ id: result.insertId });
-  });
-});
-
-
-// Retrieve all movies
-app.get("/movies", function(req, res) {
-  connection.query("SELECT * FROM movies;", function(err, data) {
-    if (err) {
-      return res.status(500).end();
-    }
-
-    res.json(data);
-  });
-});
-
-// Update a movie
-app.put("/movies/:id", function(req, res) {
-  connection.query("UPDATE movies SET movie = ? WHERE id = ?", [
-    req.body.movie, req.params.id
-  ], function(err, result) {
-    if (err) {
-      // If an error occurred, send a generic server faliure
-      return res.status(500).end();
-    } else if (result.changedRows == 0) {
-      // If no rows were changed, then the ID must not exist, so 404
-      return res.status(404).end();
-    } else {
-      res.status(200).end();
-    }
-  });
-});
-
-
-// Delete a movie
-app.delete("/movies/:id", function(req, res) {
-  connection.query("DELETE FROM movies WHERE id = ?", [req.params.id], function(err, result) {
-    if (err) {
-      // If an error occurred, send a generic server faliure
-      return res.status(500).end();
-    } else if (result.affectedRows == 0) {
-      // If no rows were changed, then the ID must not exist, so 404
-      return res.status(404).end();
-    } else {
-      res.status(200).end();
-    }
-  });
-});
-
-
-app.listen(port, function() {
-  console.log("listening on port", port);
-});
+// Start listening.
+app.listen(PORT);

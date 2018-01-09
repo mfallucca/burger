@@ -1,87 +1,70 @@
-<h1>Movies To Watch</h1>
 
-<ul>
-  {{#each movies}}
-    <li>
-      <p>
-        {{this.id}}. {{this.movie}}
+<!-- Header -->
+<div class="row">
+    <div class="col-xs-12">
+        <h1>Eat Da Burger!</h1>
+    </div>
+</div>
 
-        <button data-movieid="{{this.id}}" class="delmovie">Delete</button>
-      </p>
-    </li>
-  {{/each}}
-</ul>
+<div class="row">
+    <!-- Ready burger column -->
+    <div class="col-xs-12 col-sm-4">
+        <h2>Ready</h2>
 
-<h2>Add a Movie to Watch</h2>
-<form id="addmovie" class="button-size">
-	<textarea type="text" name="movie"></textarea>
-	<button type="submit">Save Movie!</button>
-</form>
+        <ul>
+            <!--Iterate through 'burgers' data item. If not devoured, create an item with its name and a 'devour' button. -->
+            {{#each burgers}}
+                {{#unless this.devoured}}
+                    <li class="holder">
+                    <h4>{{this.burger_name}}</h4>
 
-<h2>Update a Movie</h2>
-<form id="updatemovie" class="button-size">
-  <input type="text" name="id" placeholder="id">
-	<textarea type="text" name="movie" placeholder="what do you want to update this movie title to?"></textarea>
-	<button type="submit">Update Movie!</button>
-</form>
+                    <form action="/{{this.id}}?_method=PUT" method="POST">
+                        <input type="hidden" name="devoured" value="true">
+                        <button type="submit" class="btn btn-danger btn-sm">EAT IT!</button>
+                    </form>
+                    </li>
+                {{/unless}}
+            {{/each}}
+        </ul>
+    </div>
 
-<script type="text/javascript">
-  $(".delmovie").on("click", function(event) {
-    var id = $(this).data("movieid");
+    <!-- New burger column -->
+    <div class="col-xs-12 col-sm-4">
 
-    // Send the DELETE request.
-    $.ajax("/movies/" + id, {
-      type: "DELETE"
-    }).then(
-      function() {
-        console.log("deleted id ", id);
-        // Reload the page to get the updated list
-        location.reload();
-      }
-    );
-  });
+        <img src="assets/img/burger.png" alt="A drawing of a burger with several layers of toppings">
 
-  $("#addmovie").on("submit", function(event) {
-    // Make sure to preventDefault on a submit event.
-    event.preventDefault();
+        <!-- Burger addition form -->
+        <h2>Add a Burger</h2>
+        <form class="create-update-form add-form" action="/" method="POST">
 
-    var newMovie = {
-      movie: $("#addmovie [name=movie]").val().trim()
-    };
+            <div class="form-group">
+                <label for="burger" class="sr-only">Burger Name:</label>
+                <input type="text" id="burger" name="name" placeholder="Burger Name" class="form-control" maxlength="30">
+            </div>
 
-    // Send the POST request.
-    $.ajax("/movies", {
-      type: "POST",
-      data: newMovie
-    }).then(
-      function() {
-        console.log("added new movie");
-        // Reload the page to get the updated list
-        location.reload();
-      }
-    );
-  });
+            <button type="submit" class="btn btn-danger">Add Burger</button>
+        </form>
+    </div>
 
-  $("#updatemovie").on("submit", function(event) {
-    // Make sure to preventDefault on a submit event.
-    event.preventDefault();
+    <!--Eaten burger column-->
+    <div class="col-xs-12 col-sm-4">
 
-    var id = $("[name=id]").val().trim();
+        <h2>Devoured!</h2>
 
-    var updatedMovie = {
-      movie: $("#updatemovie [name=movie]").val().trim()
-    };
+        <ul>
+            <!--Iterate through 'burgers' data item. If devoured, create an item with its name and a button. -->
+            {{#each burgers}}
+                {{#if this.devoured}}
+                    <li class="holder">
+                    <h4>{{this.burger_name}}</h4>
 
-    // Send the PUT request.
-    $.ajax("/movies/" + id, {
-      type: "PUT",
-      data: updatedMovie
-    }).then(
-      function() {
-        console.log("updated id ", id);
-        // Reload the page to get the updated list
-        location.reload();
-      }
-    );
-  });
-</script>
+                    <form action="/{{this.id}}?_method=PUT" method="POST">
+                        <input type="hidden" name="devoured" value="false">
+                        <button type="submit" class="btn btn-danger btn-sm">MAKE ANOTHER!</button>
+                    </form>
+                </li>
+                {{/if}}
+            {{/each}}
+        </ul>
+    </div>
+</div>
